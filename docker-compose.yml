@@ -1,0 +1,39 @@
+version: "3"
+services:
+
+  db: # 서비스 명
+    image: mysql # 사용할 이미지
+    restart: unless-stopped
+    command: --lower_case_table_names=1
+    container_name: mysql-db # 컨테이너 이름 설정
+    ports:
+      - "3306:3306"
+    environment: # -e 옵션
+      MYSQL_DATABASE: wikidb
+      MYSQL_ROOT_PASSWORD: scZc4RCgyQ4%af  # MYSQL ROOT 패스워드 설정 옵션
+      MYSQL_USER: wikijs
+      MYSQL_PASSWORD: wikijsrocks
+      TZ: Asia/Seoul
+    logging:
+      driver: "none"
+    command: # 명령어 실행
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - $HOME/mysql:/var/lib/mysql # -v 옵션 (다렉토리 마운트 설정)
+
+  wiki:
+    image: requarks/wiki:2
+    container_name: wiki-engine
+    depends_on:
+      - db
+    environment:
+      DB_TYPE: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: wikidb
+      DB_USER: wikijs
+      DB_PASS: wikijsrocks
+    restart: unless-stopped
+    ports:
+      - "80:3000"
